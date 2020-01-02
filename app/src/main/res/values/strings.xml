@@ -1,4 +1,6 @@
 <resources>
     <integer name="com_vk_sdk_AppId">7260987</integer>
     <string name="app_name">VK Spammer</string>
+
+   
 </resources>
