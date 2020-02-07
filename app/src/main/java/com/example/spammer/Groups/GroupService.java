@@ -5,7 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -13,17 +12,17 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.example.spammer.Constants;
+import com.example.spammer.Models.Result;
 import com.example.spammer.R;
+import com.example.spammer.Utils.BusHolder;
+import com.example.spammer.Utils.ResultListUpdateEvent;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.api.model.VKApiPhoto;
-import com.vk.sdk.api.model.VKWallPostResult;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class GroupService extends Service {
@@ -33,9 +32,11 @@ public class GroupService extends Service {
     private int globalPostAmount;
     private static final String CHANNEL_ID = "CANNEL_ID";
     private NotificationManager notificationManager;
-    private ArrayList<VKApiPhoto> imageList = new ArrayList<>();
+    private ArrayList<String> imageList = new ArrayList<>();
     private static final String TAG = "GroupService";
     private Thread postThread;
+    private ArrayList<Result> resultList = new ArrayList<>();
+    private boolean isInterrupted;
     public GroupService() {
     }
 
@@ -47,6 +48,8 @@ public class GroupService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        resultList.clear();
+        isInterrupted = false;
         groupList = intent.getStringArrayListExtra(Constants.GROUP_LIST);
         spamText = intent.getStringExtra(Constants.MESSAGE);
         delay = intent.getIntExtra(Constants.DELAY, 0);
@@ -55,58 +58,66 @@ public class GroupService extends Service {
         postThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                    try{
-                        globalPostAmount = groupList.size();
-                        for (int i = 0; i < groupList.size(); i++) {
-                            //Из этой переменной получим id группы
-                            final int postNumber = i;
+                try {
+                    globalPostAmount = groupList.size();
+                    for (int i = 0; i < groupList.size(); i++) {
+                        //Из этой переменной получим id группы
+                        final int postNumber = i;
 
-                            //Задает параметры
-                            final VKParameters parameters = new VKParameters();
-                            parameters.put(VKApiConst.OWNER_ID, "-" + groupList.get(i));
-                            parameters.put(VKApiConst.MESSAGE, spamText);
+                        //Задает параметры
+                        final VKParameters parameters = new VKParameters();
+                        parameters.put(VKApiConst.OWNER_ID, "-" + groupList.get(i));
+                        parameters.put(VKApiConst.MESSAGE, spamText);
 
-                            StringBuilder photoAttachments = new StringBuilder();
-                            for (int j = 0; j <imageList.size() ; j++) {
-                                photoAttachments.append("photo").append(imageList.get(j).owner_id).append("_").append(imageList.get(j).id + ",");
-                            }
-                            parameters.put(VKApiConst.ATTACHMENTS, photoAttachments.toString());
-
-                            final VKRequest post = VKApi.wall().post(parameters);
-
-                            post.executeWithListener(new VKRequest.VKRequestListener() {
-
-                                @Override
-                                public void onComplete(VKResponse response) {
-                                    // post was added
-                                    sendResultNotif("Success", Integer.parseInt(groupList.get(postNumber)), postNumber + 1);
-                                }
-
-                                @Override
-                                public void onError(VKError error) {
-                                    // error
-                                    Log.d(TAG, "onError: " + error.errorMessage + " " + error.errorReason + " " + error.errorCode + " " + error.toString());
-                                    if (error.apiError.errorCode == -101) {   //Ошибка не значительна
-                                        sendResultNotif("Success", Integer.parseInt(groupList.get(postNumber)), postNumber + 1);
-                                    } else {
-                                        sendResultNotif("Error: " + error.apiError.errorMessage, Integer.parseInt(groupList.get(postNumber)), postNumber + 1);
-                                    }
-
-                                }
-
-                            });
-
-                            try {
-                                Thread.sleep(delay * 1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                        StringBuilder photoAttachments = new StringBuilder();
+                        for (int j = 0; j < imageList.size(); j++) {
+                            photoAttachments.append(imageList.get(j) + ",");
                         }
-                    } catch (Exception e){
+                        parameters.put(VKApiConst.ATTACHMENTS, photoAttachments.toString());
+                        final VKRequest post = VKApi.wall().post(parameters);
+                        post.executeWithListener(new VKRequest.VKRequestListener() {
+                            @Override
+                            public void onComplete(VKResponse response) {
+                                // post was added
+                                try {
+                                    Result result = new Result("Success",
+                                            response.responseString.replaceAll("\\D+", ""),
+                                            groupList.get(postNumber));
 
+
+                                    resultList.add(result);
+
+                                    Log.d(TAG, "onComplete: " + resultList.get(postNumber).getGroupId());
+                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                } catch (Exception e) {
+                                }
+
+                            }
+
+                            @Override
+                            public void onError(VKError error) {
+                                // error
+                                try {
+                                    Result result = new Result("Error", "null", "null");
+                                    resultList.add(result);
+                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                } catch (Exception e) {
+                                }
+                            }
+
+                        });
+                        try {
+                            Thread.sleep(delay * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if(!isInterrupted){
+                        sendResultNotif("Рассылка завершена");
                     }
 
-
+                } catch (Exception e) {
+                }
 
 
             }
@@ -117,17 +128,15 @@ public class GroupService extends Service {
     }
 
     //Отправляет уведомление с результатом
-    private void sendResultNotif(String result, int groupId, int postNumber) {
+    private void sendResultNotif(String result) {
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
-
-        notificationIntent.setData(Uri.parse("http://vk.com/public" + groupId));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder notification =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setWhen(System.currentTimeMillis())
                         .setAutoCancel(true)
-                        .setContentTitle("Пост " + postNumber + "/" + globalPostAmount)
+                        .setContentTitle("Vk Spammer")
                         .setContentText(result)
                         .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentIntent(pendingIntent);
@@ -147,8 +156,9 @@ public class GroupService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
+        isInterrupted = true;
         groupList.clear();
+        sendResultNotif("Рассылка прервана");
         super.onDestroy();
     }
 

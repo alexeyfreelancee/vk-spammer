@@ -1,121 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#c9f6ff"
+    android:fillViewport="true"
     tools:context=".Groups.GroupFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <EditText
-            android:id="@+id/et_spamgroups"
-            android:layout_width="250dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="25dp"
-            android:background="@drawable/input"
-            android:elevation="8dp"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="@string/id"
-            android:inputType="textMultiLine"
-            android:maxHeight="100dp"
-            android:padding="10dp"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <EditText
-            app:fontFamily="sans-serif-thin"
-            android:elevation="8dp"
-            android:padding="10dp"
-            android:background="@drawable/input"
-            android:id="@+id/et_spamtext"
-            android:layout_width="250dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="16dp"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="@string/text"
-            android:inputType="textMultiLine"
-            android:maxHeight="100dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_spamgroups" />
-
-        <EditText
-            android:id="@+id/delay"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/input"
-            android:elevation="8dp"
-            android:ems="10"
-            android:hint="@string/delay"
-            android:inputType="number"
-            android:padding="10dp"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.503"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_spamtext" />
-
-        <Button
-            android:id="@+id/b_start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/button"
-            android:padding="10dp"
-            android:text="Начать рассылку"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/delay" />
-
-        <Button
-            android:id="@+id/b_addPhoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:background="@drawable/button"
-            android:padding="10dp"
-            android:text="@string/add_photo"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/delay" />
+        android:layout_height="wrap_content"
+        android:background="#c9f6ff">
 
 
-        <Button
-            android:id="@+id/b_stop_spam"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/button"
-            android:padding="10dp"
-            android:text="@string/stop_spam"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/b_start" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/b_delete_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/button"
-            android:padding="10dp"
-            android:text="@string/delete_photo"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/b_addPhoto" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <EditText
+                android:id="@+id/et_spamgroups"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/input"
+                android:elevation="8dp"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="@string/id"
+                android:inputType="textMultiLine"
+                android:maxHeight="100dp"
+                android:padding="10dp"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+            <EditText
+                android:id="@+id/et_spamtext"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/input"
+                android:elevation="8dp"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="@string/text"
+                android:inputType="textMultiLine"
+                android:maxHeight="100dp"
+                android:padding="10dp"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/et_spamgroups" />
+
+
+            <EditText
+                android:id="@+id/et_photos"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/input"
+                android:elevation="8dp"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="@string/id_photo"
+                android:inputType="textMultiLine"
+                android:maxHeight="100dp"
+                android:padding="10dp"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/et_spamtext" />
+
+            <EditText
+                android:id="@+id/delay"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/input"
+                android:elevation="8dp"
+                android:ems="10"
+                android:hint="@string/delay"
+                android:inputType="number"
+                android:padding="10dp"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/et_photos" />
+
+            <Button
+                android:id="@+id/b_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/button"
+                android:padding="10dp"
+                android:text="Начать рассылку"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/b_stop_spam" />
+
+
+            <Button
+                android:id="@+id/b_stop_spam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/button"
+                android:padding="10dp"
+                android:text="@string/stop_spam"
+                app:fontFamily="sans-serif-thin"
+                app:layout_constraintBottom_toTopOf="@+id/b_start"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/input"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/delay">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_group_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    />
+
+            </LinearLayout>
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+</ScrollView>

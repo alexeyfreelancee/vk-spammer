@@ -1,36 +1,33 @@
 package com.example.spammer.Comments;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.spammer.Constants;
+import com.example.spammer.Groups.GroupResultListAdapter;
+import com.example.spammer.Models.Result;
 import com.example.spammer.R;
-import com.vk.sdk.api.VKApi;
-import com.vk.sdk.api.VKError;
-import com.vk.sdk.api.VKRequest;
-import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.api.model.VKApiPhoto;
-import com.vk.sdk.api.model.VKPhotoArray;
-import com.vk.sdk.api.photo.VKImageParameters;
-import com.vk.sdk.api.photo.VKUploadImage;
+import com.example.spammer.Utils.BusHolder;
+import com.example.spammer.Utils.ResultListUpdateEvent;
 
-import java.io.IOException;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static android.app.Activity.RESULT_OK;
+import static android.view.View.GONE;
 import static com.example.spammer.MainActivity.MainActivity.hasConnection;
 
 
@@ -40,15 +37,17 @@ public class CommentFragment extends Fragment{
     private Button b_start_spam;
     private EditText et_amount;
     private EditText et_delay;
-    private Button b_add_photo;
     private Button b_stop_spam;
-    private Button b_delete_photo;
+    private EditText et_photos;
     private int delay;
     private int amount;
     private String spamText;
     private ArrayList<Integer> groupList;
-    private static ArrayList<VKApiPhoto> imageList = new ArrayList<>();
-
+    private static ArrayList<String> imageList = new ArrayList<>();
+    private RecyclerView rv_results;
+    private CommentResultListAdapter groupResultListAdapter;
+    private static ArrayList<Result> resultList = new ArrayList<>();
+    private LinearLayout rv_layout;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,14 +59,8 @@ public class CommentFragment extends Fragment{
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_comment, container, false);
         initViews(v);
+        initResultList();
         return v;
-    }
-
-    @Override
-    public void onResume() {
-        imageList.clear();
-        b_add_photo.setText(imageList.size() + " фото выбрано");
-        super.onResume();
     }
 
     private void startCommentService(){
@@ -98,6 +91,16 @@ public class CommentFragment extends Fragment{
                     }
                 }
 
+                //Добавление айди групп в массив
+                Scanner scannerPhotos = new Scanner(et_photos.getText().toString());
+                while (scannerPhotos.hasNext()) {
+                    String resultPhotoLink = scannerPhotos.nextLine();
+
+                    if (!resultPhotoLink.equals("")) {
+                        imageList.add(resultPhotoLink);
+                    }
+                }
+
                 startCommentService();
             }
         }
@@ -111,53 +114,22 @@ public class CommentFragment extends Fragment{
         }
     };
 
-    private View.OnClickListener addPhotoListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select profile image"), Constants.CODE_CHOSE_IMAGE);
-        }
-    };
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.CODE_CHOSE_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri uriProfileImage = data.getData();
-            Bitmap photo = null;
-            try {
-                photo = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uriProfileImage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (imageList.size() >= 6) {
-                Toast.makeText(getContext(), "Макисмальное кол-во фото 6", Toast.LENGTH_SHORT).show();
-            } else {
-                VKRequest request = VKApi.uploadWallPhotoRequest(new VKUploadImage(photo, VKImageParameters.jpgImage(0.9f)), 0, 60479154);
-                final Bitmap finalPhoto = photo;
-                request.executeWithListener(new VKRequest.VKRequestListener() {
-                    @Override
-                    public void onComplete(VKResponse response) {
-                        super.onComplete(response);
-                        finalPhoto.recycle();
-                        imageList.add(((VKPhotoArray) response.parsedModel).get(0));
-                        b_add_photo.setText(imageList.size() + " фото выбрано");
-                    }
-
-                    @Override
-                    public void onError(VKError error) {
-                        super.onError(error);
-                    }
-                });
-            }
-
-
+    private void initResultList(){
+        groupResultListAdapter = new CommentResultListAdapter(resultList, getContext());
+        rv_results.setAdapter(groupResultListAdapter);
+        if(resultList.isEmpty()){
+            rv_layout.setVisibility(GONE);
+        } else {
+            rv_layout.setVisibility(View.VISIBLE);
         }
     }
 
+    @Subscribe
+    public void onResultListUpdate(ResultListUpdateEvent event) {
+        //Update RecyclerView
+        resultList = event.getResultList();
+        initResultList();
+    }
     private void initViews(View v){
         b_start_spam = v.findViewById(R.id.b_start);
         b_start_spam.setOnClickListener(startListener);
@@ -165,25 +137,22 @@ public class CommentFragment extends Fragment{
         b_stop_spam = v.findViewById(R.id.b_stop_spam);
         b_stop_spam.setOnClickListener(stopListener);
 
-        b_add_photo = v.findViewById(R.id.b_addPhoto);
-        b_add_photo.setOnClickListener(addPhotoListener);
-
-        b_delete_photo = v.findViewById(R.id.b_delete_photo);
-        b_delete_photo.setOnClickListener(deleteListener);
-
+        et_photos = v.findViewById(R.id.et_photos);
         et_delay = v.findViewById(R.id.delay);
         et_spamtext = v.findViewById(R.id.et_spamtext);
         et_spamgroups = v.findViewById(R.id.et_spamgroups);
         et_amount = v.findViewById(R.id.et_amount_com);
-    }
 
-    private View.OnClickListener deleteListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            imageList.clear();
-            b_add_photo.setText(R.string.add_photo);
-        }
-    };
+        rv_layout = v.findViewById(R.id.linearLayout);
+        rv_results = v.findViewById(R.id.rv_comment_results);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext()){
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        rv_results.setLayoutManager(linearLayoutManager);
+    }
 
     private boolean checkErrors() {
         //Проверяет подключение к интернету
@@ -209,7 +178,23 @@ public class CommentFragment extends Fragment{
         return true;
     }
 
-    public static ArrayList<VKApiPhoto> getImageList() {
+    public static void setResultList(ArrayList<Result> resultList) {
+       CommentFragment.resultList = resultList;
+    }
+
+    public static ArrayList<String> getImageList() {
         return imageList;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BusHolder.getInstnace().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        BusHolder.getInstnace().unregister(this);
     }
 }

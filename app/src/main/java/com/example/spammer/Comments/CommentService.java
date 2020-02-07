@@ -5,16 +5,18 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.example.spammer.Constants;
+import com.example.spammer.Models.Result;
 import com.example.spammer.R;
+import com.example.spammer.Utils.BusHolder;
+import com.example.spammer.Utils.ResultListUpdateEvent;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
@@ -22,7 +24,6 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.api.model.VKApiPhoto;
 
 import org.json.JSONObject;
 
@@ -41,7 +42,9 @@ public class CommentService extends Service {
     private int neededAmount;
     private String spamText;
     private ArrayList<Integer> groupList;
-    private ArrayList<VKApiPhoto> imageList = new ArrayList<>();
+    private ArrayList<String> imageList = new ArrayList<>();
+    private ArrayList<Result> resultList = new ArrayList<>();
+    private boolean isInterrupted;
     public CommentService() {
     }
 
@@ -53,6 +56,8 @@ public class CommentService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        resultList.clear();
+        isInterrupted = false;
         groupList = intent.getIntegerArrayListExtra(Constants.GROUP_LIST);
         spamText = intent.getStringExtra(Constants.MESSAGE);
         delay = intent.getIntExtra(Constants.DELAY, 0);
@@ -62,7 +67,7 @@ public class CommentService extends Service {
         final Thread threadCom = new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     ArrayList<Integer> postIds = getPostIds(groupList, neededAmount);
                     //Переменная, засчет которой группа получает СВОЙ postId
                     globalCommentAmount = groupList.size() * neededAmount;
@@ -71,8 +76,8 @@ public class CommentService extends Service {
                         for (int j = 0; j < neededAmount; j++) {
                             final int postId = postIds.get(j + temp);
                             StringBuilder photoAttachments = new StringBuilder();
-                            for (int k = 0; k <imageList.size() ; k++) {
-                                photoAttachments.append("photo").append(imageList.get(k).owner_id).append("_").append(imageList.get(k).id + ",");
+                            for (int k = 0; k < imageList.size(); k++) {
+                                photoAttachments.append(imageList.get(k) + ",");
                             }
 
                             //Задает параметры
@@ -83,22 +88,30 @@ public class CommentService extends Service {
                             parameters.put(VKApiConst.ATTACHMENTS, photoAttachments.toString());
 
                             VKRequest createComment = VKApi.wall().addComment(parameters);
-                            final int finalJ = j + 1;
+
+                            final int finalI1 = i;
                             createComment.executeWithListener(new VKRequest.VKRequestListener() {
                                 @Override
                                 public void onComplete(VKResponse response) {
                                     super.onComplete(response);
-                                    sendResultNotif("Success", groupList.get(finalI), postId, temp + finalJ);
+                                    Result result = new Result("Success",
+                                            String.valueOf(postId),
+                                            String.valueOf(groupList.get(finalI1)),
+                                            response.responseString.replaceAll("\\D+", ""));
+
+                                    resultList.add(result);
+                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+
                                 }
 
                                 @Override
                                 public void onError(VKError error) {
                                     super.onError(error);
-                                    if (error.apiError.errorCode == -101) {   //Ошибка не значительна
-                                        sendResultNotif("Success", groupList.get(finalI), postId, temp + finalJ);
-                                    } else {
-                                        sendResultNotif("Error: " + error.apiError.errorMessage, groupList.get(finalI), postId, temp + finalJ);
-                                    }
+                                    Result result = new Result("error", "null", "null", "null");
+                                    resultList.add(result);
+                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+
+
                                 }
                             });
 
@@ -112,9 +125,12 @@ public class CommentService extends Service {
                         temp += neededAmount;
 
                     }
-                }   catch (Exception e){
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                   sendResultNotif(e.toString(), 1, 1, 1);
+                    if(!isInterrupted){
+                        sendResultNotif("Рассылка завершена");
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -162,17 +178,16 @@ public class CommentService extends Service {
     }
 
     //Отправляет уведомление с результатом
-    private void sendResultNotif(String result, int groupId, int postID, int commentNumber) {
+    private void sendResultNotif(String result) {
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
 
-        notificationIntent.setData(Uri.parse("http://vk.com/wall-" + groupId + "_" + postID));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder notification =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setWhen(System.currentTimeMillis())
                         .setAutoCancel(true)
-                        .setContentTitle("Комментарий " + commentNumber + "/" + globalCommentAmount)
+                        .setContentTitle("Vk Spammer")
                         .setContentText(result)
                         .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentIntent(pendingIntent);
@@ -191,7 +206,9 @@ public class CommentService extends Service {
 
     @Override
     public void onDestroy() {
+        isInterrupted = true;
         groupList.clear();
+        sendResultNotif("Рассылка прервана");
         super.onDestroy();
     }
 }

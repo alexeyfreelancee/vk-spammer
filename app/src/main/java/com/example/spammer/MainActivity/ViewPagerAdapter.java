@@ -11,7 +11,7 @@ import com.example.spammer.Groups.GroupFragment;
 
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-    private static final String[] TAB_TITLES = new String[]{"Translate", "Favourites", "History"};
+    private static final String[] TAB_TITLES = new String[]{"Группы", "Комментарии"};
 
     public ViewPagerAdapter(@NonNull FragmentManager fm) {
         super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);

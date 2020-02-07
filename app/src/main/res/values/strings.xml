@@ -9,6 +9,7 @@
     <string name="group_menu">Group Menu</string>
     <string name="stop_spam">Остановить рассылку</string>
     <string name="delete_photo">Удалить фото</string>
+    <string name="id_photo">ID фото</string>
 
 
 </resources>
