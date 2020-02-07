@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/main_container"
-        android:name="com.example.spammer.GroupFragment"
+        android:name="com.example.spammer.Groups.GroupFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />

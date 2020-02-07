@@ -1,4 +1,4 @@
-package com.example.spammer;
+package com.example.spammer.Utils;
 
 import com.vk.sdk.VKSdk;
 

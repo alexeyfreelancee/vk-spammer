@@ -5,59 +5,29 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#c9f6ff"
-    tools:context=".GroupFragment">
+    tools:context=".Groups.GroupFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:text="Group Menu"
-            android:textSize="50sp"
-
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-
-        <Button
-            android:id="@+id/b_start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/button"
-            android:padding="10dp"
-            android:text="Начать рассылку"
-            app:fontFamily="sans-serif-thin"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/delay"
-            app:layout_constraintVertical_bias="0.504" />
 
         <EditText
             android:id="@+id/et_spamgroups"
             android:layout_width="250dp"
             android:layout_height="100dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="100dp"
             android:background="@drawable/input"
             android:elevation="8dp"
             android:ems="10"
             android:gravity="start|top"
-            android:hint="ID групп для спама"
+            android:hint="@string/id"
             android:inputType="textMultiLine"
             android:maxHeight="100dp"
             android:padding="10dp"
             app:fontFamily="sans-serif-thin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/label" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             app:fontFamily="sans-serif-thin"
@@ -70,7 +40,7 @@
             android:layout_marginTop="16dp"
             android:ems="10"
             android:gravity="start|top"
-            android:hint="Рассылаемый текст"
+            android:hint="@string/text"
             android:inputType="textMultiLine"
             android:maxHeight="100dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -85,7 +55,7 @@
             android:background="@drawable/input"
             android:elevation="8dp"
             android:ems="10"
-            android:hint="Задержка"
+            android:hint="@string/delay"
             android:inputType="number"
             android:padding="10dp"
             app:fontFamily="sans-serif-thin"
@@ -93,6 +63,59 @@
             app:layout_constraintHorizontal_bias="0.503"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/et_spamtext" />
+
+        <Button
+            android:id="@+id/b_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button"
+            android:padding="10dp"
+            android:text="Начать рассылку"
+            app:fontFamily="sans-serif-thin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/b_stop_spam" />
+
+        <Button
+            android:id="@+id/b_addPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/button"
+            android:padding="10dp"
+            android:text="@string/add_photo"
+            app:fontFamily="sans-serif-thin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/delay" />
+
+
+        <Button
+            android:id="@+id/b_stop_spam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button"
+            android:padding="10dp"
+            android:text="@string/stop_spam"
+            app:fontFamily="sans-serif-thin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/delay" />
+
+        <Button
+            android:id="@+id/b_delete_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button"
+            android:padding="10dp"
+            android:text="@string/delete_photo"
+            app:fontFamily="sans-serif-thin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/b_addPhoto" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

@@ -1,6 +1,14 @@
 <resources>
     <integer name="com_vk_sdk_AppId">7260987</integer>
     <string name="app_name">VK Spammer</string>
+    <string name="add_photo">Прикрепить фото</string>
+    <string name="delay">Задержка</string>
+    <string name="text">Рассылаемый текст</string>
+    <string name="id">ID групп для спама</string>
+    <string name="start">Начать рассылку</string>
+    <string name="group_menu">Group Menu</string>
+    <string name="stop_spam">Остановить рассылку</string>
+    <string name="delete_photo">Удалить фото</string>
 
 
 </resources>
