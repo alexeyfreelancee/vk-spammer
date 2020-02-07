@@ -17,13 +17,21 @@ import androidx.fragment.app.Fragment;
 
 import com.example.spammer.Constants;
 import com.example.spammer.R;
+import com.vk.sdk.api.VKApi;
+import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiPhoto;
+import com.vk.sdk.api.model.VKPhotoArray;
+import com.vk.sdk.api.photo.VKImageParameters;
+import com.vk.sdk.api.photo.VKUploadImage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.spammer.MainActivity.hasConnection;
+import static com.example.spammer.MainActivity.MainActivity.hasConnection;
 
 
 public class CommentFragment extends Fragment{
@@ -39,7 +47,7 @@ public class CommentFragment extends Fragment{
     private int amount;
     private String spamText;
     private ArrayList<Integer> groupList;
-    private ArrayList<Bitmap> imageList = new ArrayList<>();
+    private static ArrayList<VKApiPhoto> imageList = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,13 @@ public class CommentFragment extends Fragment{
         View v = inflater.inflate(R.layout.fragment_comment, container, false);
         initViews(v);
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        imageList.clear();
+        b_add_photo.setText(imageList.size() + " фото выбрано");
+        super.onResume();
     }
 
     private void startCommentService(){
@@ -92,7 +107,7 @@ public class CommentFragment extends Fragment{
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(getContext(), CommentService.class);
-            getActivity().startService(intent);
+            getActivity().stopService(intent);
         }
     };
 
@@ -111,13 +126,35 @@ public class CommentFragment extends Fragment{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.CODE_CHOSE_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uriProfileImage = data.getData();
-
+            Bitmap photo = null;
             try {
-                imageList.add(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uriProfileImage));
-                b_add_photo.setText(imageList.size() +" фото выбрано");
+                photo = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uriProfileImage);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            if (imageList.size() >= 6) {
+                Toast.makeText(getContext(), "Макисмальное кол-во фото 6", Toast.LENGTH_SHORT).show();
+            } else {
+                VKRequest request = VKApi.uploadWallPhotoRequest(new VKUploadImage(photo, VKImageParameters.jpgImage(0.9f)), 0, 60479154);
+                final Bitmap finalPhoto = photo;
+                request.executeWithListener(new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(VKResponse response) {
+                        super.onComplete(response);
+                        finalPhoto.recycle();
+                        imageList.add(((VKPhotoArray) response.parsedModel).get(0));
+                        b_add_photo.setText(imageList.size() + " фото выбрано");
+                    }
+
+                    @Override
+                    public void onError(VKError error) {
+                        super.onError(error);
+                    }
+                });
+            }
+
+
         }
     }
 
@@ -147,7 +184,7 @@ public class CommentFragment extends Fragment{
             b_add_photo.setText(R.string.add_photo);
         }
     };
-    
+
     private boolean checkErrors() {
         //Проверяет подключение к интернету
         if (!hasConnection(getContext())) {
@@ -172,4 +209,7 @@ public class CommentFragment extends Fragment{
         return true;
     }
 
+    public static ArrayList<VKApiPhoto> getImageList() {
+        return imageList;
+    }
 }

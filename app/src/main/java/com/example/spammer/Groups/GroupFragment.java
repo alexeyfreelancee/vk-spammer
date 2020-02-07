@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,25 +13,33 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.spammer.Constants;
 import com.example.spammer.R;
+import com.vk.sdk.api.VKApi;
+import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiPhoto;
+import com.vk.sdk.api.model.VKPhotoArray;
+import com.vk.sdk.api.photo.VKImageParameters;
+import com.vk.sdk.api.photo.VKUploadImage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.spammer.MainActivity.hasConnection;
+import static com.example.spammer.MainActivity.MainActivity.hasConnection;
 
 
-public class GroupFragment extends Fragment{
+public class GroupFragment extends Fragment {
     private ArrayList<String> groupList;
     private String spamText;
     private int delay;
+    private String spamGroups;
     private Button b_stop_spam;
     private EditText et_delay;
     private EditText et_spamgroups;
@@ -38,11 +47,18 @@ public class GroupFragment extends Fragment{
     private Button b_start;
     private Button b_add_photo;
     private Button b_delete_photo;
-
-    private ArrayList<Bitmap> imageList = new ArrayList<>();
-
+    private static ArrayList<VKApiPhoto> imageList = new ArrayList<>();
+    private static final String TAG = "GroupFragment";
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if(savedInstanceState != null){
+            spamText = savedInstanceState.getString("spamText");
+            spamGroups = savedInstanceState.getString("groupId");
+            delay = savedInstanceState.getInt("delay");
+
+            Log.d(TAG, "onCreate: " + spamGroups);
+        }
+
         super.onCreate(savedInstanceState);
     }
 
@@ -54,15 +70,22 @@ public class GroupFragment extends Fragment{
         return v;
     }
 
-    private void startGroupService(){
+    private void startGroupService() {
         Intent intent = new Intent(getContext(), GroupService.class);
         intent.putExtra(Constants.DELAY, delay);
         intent.putExtra(Constants.GROUP_LIST, groupList);
         intent.putExtra(Constants.MESSAGE, spamText);
+
         getActivity().startService(intent);
 
     }
 
+    @Override
+    public void onResume() {
+        imageList.clear();
+        b_add_photo.setText(imageList.size() + " фото выбрано");
+        super.onResume();
+    }
 
     private View.OnClickListener addPhotoListener = new View.OnClickListener() {
         @Override
@@ -75,24 +98,47 @@ public class GroupFragment extends Fragment{
     };
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.CODE_CHOSE_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uriProfileImage = data.getData();
-
+            Bitmap photo = null;
             try {
-                imageList.add(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uriProfileImage));
-                b_add_photo.setText(imageList.size() +" фото выбрано");
+                photo = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uriProfileImage);
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.d(TAG, "onActivityResult: error");
             }
+
+            if (imageList.size() >= 6) {
+                Toast.makeText(getContext(), "Макисмальное кол-во фото 6", Toast.LENGTH_SHORT).show();
+            } else {
+                VKRequest request = VKApi.uploadWallPhotoRequest(new VKUploadImage(photo, VKImageParameters.jpgImage(0.9f)), 0, 191739563);
+                final Bitmap finalPhoto = photo;
+                request.executeWithListener(new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(VKResponse response) {
+                        super.onComplete(response);
+                        finalPhoto.recycle();
+                        imageList.add(((VKPhotoArray) response.parsedModel).get(0));
+                        b_add_photo.setText(imageList.size() + " фото выбрано");
+                    }
+
+                    @Override
+                    public void onError(VKError error) {
+                        super.onError(error);
+                    }
+                });
+            }
+
+
         }
     }
 
     private View.OnClickListener startListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(checkErrors()){
+            if (checkErrors()) {
                 groupList = new ArrayList<>();
                 delay = Integer.parseInt(et_delay.getText().toString());
                 spamText = et_spamtext.getText().toString();
@@ -120,7 +166,7 @@ public class GroupFragment extends Fragment{
         }
     };
 
-    private void initViews(View v){
+    private void initViews(View v) {
         b_start = v.findViewById(R.id.b_start);
         b_start.setOnClickListener(startListener);
 
@@ -132,6 +178,7 @@ public class GroupFragment extends Fragment{
 
         b_delete_photo = v.findViewById(R.id.b_delete_photo);
         b_delete_photo.setOnClickListener(deleteListener);
+
         et_delay = v.findViewById(R.id.delay);
         et_spamtext = v.findViewById(R.id.et_spamtext);
         et_spamgroups = v.findViewById(R.id.et_spamgroups);
@@ -145,7 +192,7 @@ public class GroupFragment extends Fragment{
         }
     };
 
-    private boolean checkErrors(){
+    private boolean checkErrors() {
         //Проверяет подключение к интернету
         if (!hasConnection(getContext())) {
             Toast.makeText(getContext(), "Нет подключения к интернету!" + "\n" + "Попробуйте позже", Toast.LENGTH_LONG).show();
@@ -169,4 +216,8 @@ public class GroupFragment extends Fragment{
         return true;
     }
 
+
+    public static ArrayList<VKApiPhoto> getImageList() {
+        return imageList;
+    }
 }

@@ -4,13 +4,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 
 import com.example.spammer.Constants;
@@ -22,6 +22,7 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiPhoto;
 
 import org.json.JSONObject;
 
@@ -40,7 +41,7 @@ public class CommentService extends Service {
     private int neededAmount;
     private String spamText;
     private ArrayList<Integer> groupList;
-
+    private ArrayList<VKApiPhoto> imageList = new ArrayList<>();
     public CommentService() {
     }
 
@@ -56,59 +57,64 @@ public class CommentService extends Service {
         spamText = intent.getStringExtra(Constants.MESSAGE);
         delay = intent.getIntExtra(Constants.DELAY, 0);
         neededAmount = intent.getIntExtra(Constants.NEEDED_AMOUNT, 1);
+        imageList = CommentFragment.getImageList();
+
         final Thread threadCom = new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayList<Integer> postIds = new ArrayList<>();
-                try {
-                    postIds = getPostIds(groupList, neededAmount);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                //Переменная, засчет которой группа получает СВОЙ postId
-                globalCommentAmount = groupList.size() * neededAmount;
-                for (int i = 0; i < groupList.size(); i++) {
-                    final int finalI = i;
-                    for (int j = 0; j < neededAmount; j++) {
-                        final int postId = postIds.get(j + temp);
-
-                        //Задает параметры
-                        VKParameters parameters = new VKParameters();
-                        parameters.put(VKApiConst.OWNER_ID, "-" + groupList.get(i));
-                        parameters.put(VKApiConst.MESSAGE, spamText);
-                        parameters.put(VKApiConst.POST_ID, postIds.get(j + temp));
-
-
-                        VKRequest createComment = VKApi.wall().addComment(parameters);
-                        final int finalJ = j + 1;
-                        createComment.executeWithListener(new VKRequest.VKRequestListener() {
-                            @Override
-                            public void onComplete(VKResponse response) {
-                                super.onComplete(response);
-                                sendResultNotif("Success", groupList.get(finalI), postId, temp + finalJ);
+                try{
+                    ArrayList<Integer> postIds = getPostIds(groupList, neededAmount);
+                    //Переменная, засчет которой группа получает СВОЙ postId
+                    globalCommentAmount = groupList.size() * neededAmount;
+                    for (int i = 0; i < groupList.size(); i++) {
+                        final int finalI = i;
+                        for (int j = 0; j < neededAmount; j++) {
+                            final int postId = postIds.get(j + temp);
+                            StringBuilder photoAttachments = new StringBuilder();
+                            for (int k = 0; k <imageList.size() ; k++) {
+                                photoAttachments.append("photo").append(imageList.get(k).owner_id).append("_").append(imageList.get(k).id + ",");
                             }
 
-                            @Override
-                            public void onError(VKError error) {
-                                super.onError(error);
-                                if (error.apiError.errorCode == -101) {   //Ошибка не значительна
+                            //Задает параметры
+                            VKParameters parameters = new VKParameters();
+                            parameters.put(VKApiConst.OWNER_ID, "-" + groupList.get(i));
+                            parameters.put(VKApiConst.MESSAGE, spamText);
+                            parameters.put(VKApiConst.POST_ID, postIds.get(j + temp));
+                            parameters.put(VKApiConst.ATTACHMENTS, photoAttachments.toString());
+
+                            VKRequest createComment = VKApi.wall().addComment(parameters);
+                            final int finalJ = j + 1;
+                            createComment.executeWithListener(new VKRequest.VKRequestListener() {
+                                @Override
+                                public void onComplete(VKResponse response) {
+                                    super.onComplete(response);
                                     sendResultNotif("Success", groupList.get(finalI), postId, temp + finalJ);
-                                } else {
-                                    sendResultNotif("Error: " + error.apiError.errorMessage, groupList.get(finalI), postId, temp + finalJ);
                                 }
-                            }
-                        });
 
-                        try {
-                            Thread.sleep(delay * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                                @Override
+                                public void onError(VKError error) {
+                                    super.onError(error);
+                                    if (error.apiError.errorCode == -101) {   //Ошибка не значительна
+                                        sendResultNotif("Success", groupList.get(finalI), postId, temp + finalJ);
+                                    } else {
+                                        sendResultNotif("Error: " + error.apiError.errorMessage, groupList.get(finalI), postId, temp + finalJ);
+                                    }
+                                }
+                            });
+
+                            try {
+                                Thread.sleep(delay * 1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
                         }
+                        temp += neededAmount;
 
                     }
-                    temp += neededAmount;
-
+                }   catch (Exception e){
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                   sendResultNotif(e.toString(), 1, 1, 1);
                 }
             }
         });
@@ -181,5 +187,11 @@ public class CommentService extends Service {
             NotificationChannel nc = new NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH);
             nm.createNotificationChannel(nc);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        groupList.clear();
+        super.onDestroy();
     }
 }

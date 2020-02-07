@@ -12,13 +12,11 @@
         android:layout_height="match_parent">
 
 
-
-
         <EditText
             android:id="@+id/et_spamgroups"
             android:layout_width="250dp"
             android:layout_height="100dp"
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="25dp"
             android:background="@drawable/input"
             android:elevation="8dp"
             android:ems="10"
@@ -33,19 +31,19 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            app:fontFamily="sans-serif-thin"
-            android:elevation="8dp"
-            android:padding="10dp"
-            android:background="@drawable/input"
             android:id="@+id/et_spamtext"
             android:layout_width="250dp"
             android:layout_height="100dp"
             android:layout_marginTop="16dp"
+            android:background="@drawable/input"
+            android:elevation="8dp"
             android:ems="10"
             android:gravity="start|top"
             android:hint="Текст комментария"
             android:inputType="textMultiLine"
             android:maxHeight="100dp"
+            android:padding="10dp"
+            app:fontFamily="sans-serif-thin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/et_spamgroups" />
@@ -89,14 +87,14 @@
             android:id="@+id/b_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/button"
             android:padding="10dp"
             android:text="Начать рассылку"
             app:fontFamily="sans-serif-thin"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/b_stop_spam" />
+            app:layout_constraintTop_toBottomOf="@+id/delay" />
 
         <Button
             android:id="@+id/b_addPhoto"
@@ -116,14 +114,14 @@
             android:id="@+id/b_stop_spam"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/button"
             android:padding="10dp"
             android:text="@string/stop_spam"
             app:fontFamily="sans-serif-thin"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/delay" />
+            app:layout_constraintTop_toBottomOf="@+id/b_start" />
 
         <Button
             android:id="@+id/b_delete_photo"
