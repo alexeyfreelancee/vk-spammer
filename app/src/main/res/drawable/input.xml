@@ -3,7 +3,7 @@
     android:padding="10dp"
     android:shape="rectangle" >
 
-    <solid android:color="#FFFFFF" />
+    <solid android:color="?attr/cardBackground" />
 
     <stroke
         android:width="2dp"

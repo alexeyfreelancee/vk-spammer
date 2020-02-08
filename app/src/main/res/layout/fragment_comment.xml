@@ -11,7 +11,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#c9f6ff"
+        android:background="?attr/backgroundColor"
 
         tools:context=".Comments.CommentFragment">
 
@@ -20,134 +20,45 @@
             android:layout_height="match_parent">
 
 
-            <EditText
-                android:id="@+id/et_spamgroups"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/input"
-                android:elevation="8dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="ID групп для спама"
-                android:inputType="textMultiLine"
-                android:maxHeight="100dp"
-                android:padding="10dp"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:id="@+id/et_photos"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/input"
-                android:elevation="8dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="@string/id_photo"
-                android:inputType="textMultiLine"
-                android:maxHeight="100dp"
-                android:padding="10dp"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/et_spamtext" />
-
-            <EditText
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:id="@+id/et_spamtext"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/input"
-                android:elevation="8dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="Текст комментария"
-                android:inputType="textMultiLine"
-                android:maxHeight="100dp"
-                android:padding="10dp"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/et_spamgroups" />
-
-            <EditText
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:id="@+id/et_amount_com"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/input"
-                android:elevation="8dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="Количетсво комментариев"
-                android:inputType="number"
-                android:maxHeight="100dp"
-                android:padding="10dp"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/et_photos" />
-
-            <EditText
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:id="@+id/delay"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/input"
-                android:elevation="8dp"
-                android:ems="10"
-                android:hint="Задержка"
-                android:inputType="number"
-                android:padding="10dp"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/et_amount_com" />
-
             <Button
-                android:id="@+id/b_start"
-                android:layout_width="wrap_content"
+                android:id="@+id/b_save"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/button"
                 android:padding="10dp"
                 android:text="Начать рассылку"
                 app:fontFamily="sans-serif-thin"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/b_stop_spam" />
 
+            <Button
+            android:id="@+id/b_settings"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/button"
+            android:padding="10dp"
+            android:text="Настройки"
+            app:fontFamily="sans-serif-thin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/b_stop_spam"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:background="@drawable/button"
                 android:padding="10dp"
                 android:text="@string/stop_spam"
                 app:fontFamily="sans-serif-thin"
-                app:layout_constraintBottom_toTopOf="@+id/b_start"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.49"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/b_settings" />
 
             <LinearLayout
                 android:id="@+id/linearLayout"
@@ -156,12 +67,15 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/input"
                 android:padding="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/delay">
+                app:layout_constraintTop_toBottomOf="@+id/tv_count"
+                app:layout_constraintVertical_bias="0.0">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_comment_results"
@@ -171,6 +85,17 @@
                     />
 
             </LinearLayout>
+
+            <TextView
+                android:textColor="?attr/textColor"
+                android:id="@+id/tv_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="TextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/b_save" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,10 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Groups.GroupSettingsActivity"></activity>
+        <activity android:name=".Comments.CommentSettingsActivity" />
+
         <service
             android:name=".Groups.GroupService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
         <service
             android:name=".Comments.CommentService"
             android:enabled="true"

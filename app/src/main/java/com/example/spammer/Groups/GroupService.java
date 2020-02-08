@@ -7,15 +7,13 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.example.spammer.Constants;
 import com.example.spammer.Models.Result;
 import com.example.spammer.R;
-import com.example.spammer.Utils.BusHolder;
-import com.example.spammer.Utils.ResultListUpdateEvent;
+import com.example.spammer.Utils.TinyDB;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
@@ -29,7 +27,6 @@ public class GroupService extends Service {
     private ArrayList<String> groupList;
     private String spamText;
     private int delay;
-    private int globalPostAmount;
     private static final String CHANNEL_ID = "CANNEL_ID";
     private NotificationManager notificationManager;
     private ArrayList<String> imageList = new ArrayList<>();
@@ -37,6 +34,7 @@ public class GroupService extends Service {
     private Thread postThread;
     private ArrayList<Result> resultList = new ArrayList<>();
     private boolean isInterrupted;
+    private TinyDB tinyDB;
     public GroupService() {
     }
 
@@ -44,22 +42,25 @@ public class GroupService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        tinyDB = new TinyDB(getApplicationContext(), "group");
+    }
+
+    private void initVariables(){
+        groupList = tinyDB.getListString(Constants.GROUP_LIST);
+        spamText = tinyDB.getString(Constants.GROUP_MESSAGE);
+        delay = tinyDB.getInt(Constants.GROUP_DELAY);
+        imageList = tinyDB.getListString(Constants.GROUP_IMAGE_LIST);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         resultList.clear();
         isInterrupted = false;
-        groupList = intent.getStringArrayListExtra(Constants.GROUP_LIST);
-        spamText = intent.getStringExtra(Constants.MESSAGE);
-        delay = intent.getIntExtra(Constants.DELAY, 0);
-        imageList = GroupFragment.getImageList();
-
+        initVariables();
         postThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    globalPostAmount = groupList.size();
                     for (int i = 0; i < groupList.size(); i++) {
                         //Из этой переменной получим id группы
                         final int postNumber = i;
@@ -83,12 +84,8 @@ public class GroupService extends Service {
                                     Result result = new Result("Success",
                                             response.responseString.replaceAll("\\D+", ""),
                                             groupList.get(postNumber));
-
-
                                     resultList.add(result);
-
-                                    Log.d(TAG, "onComplete: " + resultList.get(postNumber).getGroupId());
-                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                    GroupFragment.onResultListUpdate(resultList);
                                 } catch (Exception e) {
                                 }
 
@@ -100,7 +97,7 @@ public class GroupService extends Service {
                                 try {
                                     Result result = new Result("Error", "null", "null");
                                     resultList.add(result);
-                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                    GroupFragment.onResultListUpdate(resultList);
                                 } catch (Exception e) {
                                 }
                             }

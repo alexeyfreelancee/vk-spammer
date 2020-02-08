@@ -5,18 +5,15 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.example.spammer.Constants;
 import com.example.spammer.Models.Result;
 import com.example.spammer.R;
-import com.example.spammer.Utils.BusHolder;
-import com.example.spammer.Utils.ResultListUpdateEvent;
+import com.example.spammer.Utils.TinyDB;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
@@ -45,6 +42,8 @@ public class CommentService extends Service {
     private ArrayList<String> imageList = new ArrayList<>();
     private ArrayList<Result> resultList = new ArrayList<>();
     private boolean isInterrupted;
+    private TinyDB tinyDB;
+
     public CommentService() {
     }
 
@@ -52,17 +51,20 @@ public class CommentService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        tinyDB = new TinyDB(getApplicationContext(), "comment");
     }
-
+    private void initVariables(){
+        groupList = tinyDB.getListInt(Constants.COMMENT_GROUP_LIST);
+        spamText = tinyDB.getString(Constants.COMMENT_MESSAGE);
+        delay = tinyDB.getInt(Constants.COMMENT_DELAY);
+        imageList = tinyDB.getListString(Constants.COMMENT_IMAGE_LIST);
+        neededAmount = tinyDB.getInt(Constants.COMMENT_NEEDED_AMOUNT);
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        initVariables();
         resultList.clear();
         isInterrupted = false;
-        groupList = intent.getIntegerArrayListExtra(Constants.GROUP_LIST);
-        spamText = intent.getStringExtra(Constants.MESSAGE);
-        delay = intent.getIntExtra(Constants.DELAY, 0);
-        neededAmount = intent.getIntExtra(Constants.NEEDED_AMOUNT, 1);
-        imageList = CommentFragment.getImageList();
 
         final Thread threadCom = new Thread(new Runnable() {
             @Override
@@ -72,7 +74,6 @@ public class CommentService extends Service {
                     //Переменная, засчет которой группа получает СВОЙ postId
                     globalCommentAmount = groupList.size() * neededAmount;
                     for (int i = 0; i < groupList.size(); i++) {
-                        final int finalI = i;
                         for (int j = 0; j < neededAmount; j++) {
                             final int postId = postIds.get(j + temp);
                             StringBuilder photoAttachments = new StringBuilder();
@@ -100,7 +101,7 @@ public class CommentService extends Service {
                                             response.responseString.replaceAll("\\D+", ""));
 
                                     resultList.add(result);
-                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                    CommentFragment.onResultListUpdate(resultList);
 
                                 }
 
@@ -109,7 +110,7 @@ public class CommentService extends Service {
                                     super.onError(error);
                                     Result result = new Result("error", "null", "null", "null");
                                     resultList.add(result);
-                                    BusHolder.getInstnace().post(new ResultListUpdateEvent(resultList));
+                                    CommentFragment.onResultListUpdate(resultList);
 
 
                                 }
