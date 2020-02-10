@@ -60,7 +60,7 @@ public class GroupService extends Service {
         postThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
+
                     for (int i = 0; i < groupList.size(); i++) {
                         //Из этой переменной получим id группы
                         final int postNumber = i;
@@ -112,9 +112,6 @@ public class GroupService extends Service {
                     if(!isInterrupted){
                         sendResultNotif("Рассылка завершена");
                     }
-
-                } catch (Exception e) {
-                }
 
 
             }

@@ -87,7 +87,7 @@ public class GroupFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext()){
             @Override
             public boolean canScrollVertically() {
-                return false;
+                return true;
             }
         };
         rv_results.setLayoutManager(linearLayoutManager);

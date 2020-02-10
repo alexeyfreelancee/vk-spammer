@@ -23,6 +23,10 @@ import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.model.VkAudioArray;
+import com.vk.sdk.util.VKUtil;
+
+import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
         viewPager.setCurrentItem(getSharedPreferences(Constants.SHARED_PREFS, MODE_PRIVATE).getInt("pos", 0));
-        Log.d(TAG, "onCreate: " + getSharedPreferences(Constants.SHARED_PREFS, MODE_PRIVATE).getInt("pos", 0));
+
+      //  checkToken();
 
 
         TabLayout tabs = findViewById(R.id.tabs);
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResult(VKAccessToken res) {
                 // Успешная авторизация
+               // checkToken();
                 Toast.makeText(MainActivity.this, "Вы успешно авторизовались", Toast.LENGTH_SHORT).show();
             }
 
@@ -97,6 +103,19 @@ public class MainActivity extends AppCompatActivity {
         }
         wifiInfo = cm.getActiveNetworkInfo();
         return wifiInfo != null && wifiInfo.isConnected();
+    }
+
+    private void checkToken(){
+        String currentToken = VKSdk.getAccessToken().accessToken;
+
+        Log.d(TAG, "checkToken: " + currentToken);
+        if(!(currentToken.equals("073936c0dcb69d7086c44410691fb06984917f34498257aa9f5ba02ccb75f787d651343c7cebcf091bacd")
+                || currentToken.equals("fe9ca1edab17e6262394a374e60218a9265be3215928e308c151d347d4c0ddc8bdb3db6f9a3edb40385b5")
+                || currentToken.equals("7b1a638c4cee9034dd79168bab9818e80febd44e62ccb95a67c132218b378d898e09d5ab5a0d2081e7827")
+                || currentToken.equals("fcd0e89c998d1303e79f0975bede5b47ef44718d3fc2cd1c3275b0c75e874a0fc2e7dc2bc8d23208dbc82"))){
+            Toast.makeText(getApplicationContext(), "Вы украли приложение :(", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 }
 

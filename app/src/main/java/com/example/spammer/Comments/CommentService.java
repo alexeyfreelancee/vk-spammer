@@ -69,9 +69,13 @@ public class CommentService extends Service {
         final Thread threadCom = new Thread(new Runnable() {
             @Override
             public void run() {
+                ArrayList<Integer> postIds = null;
                 try {
-                    ArrayList<Integer> postIds = getPostIds(groupList, neededAmount);
-                    //Переменная, засчет которой группа получает СВОЙ postId
+                    postIds = getPostIds(groupList, neededAmount);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //Переменная, засчет которой группа получает СВОЙ postId
                     globalCommentAmount = groupList.size() * neededAmount;
                     for (int i = 0; i < groupList.size(); i++) {
                         for (int j = 0; j < neededAmount; j++) {
@@ -130,9 +134,7 @@ public class CommentService extends Service {
                         sendResultNotif("Рассылка завершена");
 
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
             }
         });
 
