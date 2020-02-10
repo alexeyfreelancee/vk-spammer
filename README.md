@@ -1,5 +1,6 @@
 "# vk_spammer" 
 
 Screenshots:
-<img src="Screenshot_20200205_190834_com.example.spammer.jpg" width="200" height="400">
-<img src="Screenshot_20200205_190838_com.example.spammer.jpg" width="200" height="400">
+<img src="JQT2koEeQ20.jpg" width="200" height="400">
+<img src="NUTl_cPVJ5Q.jpg" width="200" height="400">
+<img src="UCrEJTmhb1g.jpg" width="200" height="400">
