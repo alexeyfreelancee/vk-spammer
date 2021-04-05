@@ -1,4 +1,4 @@
-"# vk_spammer" 
+Can spam comments, direct messages and wall posts
 
 Screenshots:
 <img src="JQT2koEeQ20.jpg" width="200" height="400">
